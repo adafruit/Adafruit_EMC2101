@@ -44,6 +44,8 @@
 #define EMC2101_REG_FAN_SETTING 0x4C
 #define EMC2101_LUT_HYSTERESIS 0x4F
 
+#define EMC2101_LUT_START 0x50 ///< The first temp threshold register
+
 #define EMC2101_TEMP_FILTER 0xBF
 #define EMC2101_REG_PARTID 0xFD // 0x16
 #define EMC2101_REG_MFGID 0xFE  // 0xFF16
@@ -93,6 +95,7 @@ public:
   uint16_t getFanRPM(void);
   float getDutyCycle(void);
   void setDutyCycle(float pwm_duty_cycle);
+  bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
 
   uint16_t getFanMaxRPM(void);
   void setFanMaxRPM(float uint16_t);

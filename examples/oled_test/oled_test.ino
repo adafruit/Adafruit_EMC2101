@@ -52,7 +52,7 @@ void setup(void) {
 
   }
 
-    emc2101.setDutyCycle(100.0);
+    emc2101.setDutyCycle(40.0);
 
 }
 void loop() {
