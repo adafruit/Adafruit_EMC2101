@@ -170,27 +170,38 @@ bool Adafruit_EMC2101::_init(void) {
  * @return float The current manually set fan duty cycle
  */
 
+bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh,
+                              uint8_t fan_pwm) {
+  if (index > 7) {
+    return false;
+  }
+  if (temp_thresh > MAX_LUT_TEMP) {
+    return false;
+  }
+  if (fan_pwm > 100) {
+    return false;
+  }
 
-bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm){
-  if(index > 7 ){ return false;}
-  if(temp_thresh > MAX_LUT_TEMP) { return false;}
-  if(fan_pwm > MAX_LUT_SPEED) { return false;}
-
-  uint8_t temp_reg_addr = EMC2101_LUT_START + (2*index); // speed/pwm is +1
-  Adafruit_BusIO_Register lut_temp = Adafruit_BusIO_Register(i2c_dev, temp_reg_addr);
-  Adafruit_BusIO_Register lut_pwm = Adafruit_BusIO_Register(i2c_dev, temp_reg_addr+1);
+  uint8_t temp_reg_addr = EMC2101_LUT_START + (2 * index); // speed/pwm is +1
+  Adafruit_BusIO_Register lut_temp =
+      Adafruit_BusIO_Register(i2c_dev, temp_reg_addr);
+  Adafruit_BusIO_Register lut_pwm =
+      Adafruit_BusIO_Register(i2c_dev, temp_reg_addr + 1);
 
   float scalar = (float)fan_pwm / 100.0;
   uint8_t scaled_pwm = (uint8_t)(scalar * MAX_LUT_SPEED);
 
   bool lut_enabled = LUTEnabled();
   LUTEnabled(false);
-  if (! lut_temp.write(temp_thresh)) { return false;}
-  if (! lut_pwm.write(scaled_pwm )) { return false;}
+  if (!lut_temp.write(temp_thresh)) {
+    return false;
+  }
+  if (!lut_pwm.write(scaled_pwm)) {
+    return false;
+  }
   LUTEnabled(lut_enabled);
 
   return true;
-
 }
 
 float Adafruit_EMC2101::getDutyCycle(void) {

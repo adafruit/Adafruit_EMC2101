@@ -96,6 +96,7 @@ public:
   float getDutyCycle(void);
   void setDutyCycle(float pwm_duty_cycle);
   bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
+  uint16_t getLUT(uint8_t index);
 
   uint16_t getFanMaxRPM(void);
   void setFanMaxRPM(float uint16_t);

@@ -45,10 +45,8 @@ void setup(void) {
  // set the second LUT entry to set the fan to 20% duty cycle
  // when the temperature goes over 30 degrees C
   emc2101.setLUT(1, 30, 20);
-  /// finally the highest temperature threshold goes last
-  emc2101.setLUT(2, 40, 50);
 
-  /// finally the highest temperature threshold goes last
+  /// the highest temperature threshold goes last
   emc2101.setLUT(3, 60, 100);
   // Finally we need to enable the LUT to give it control over the fan speed
   emc2101.LUTEnabled(true);
