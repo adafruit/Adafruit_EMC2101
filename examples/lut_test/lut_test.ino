@@ -31,7 +31,9 @@ void setup(void) {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setRotation(0);
-
+  emc2101.setDutyCycle(50);
+  emc2101.setDutyCycle(60);
+  emc2101.setDutyCycle(75);
 
  /************ LUT SETUP ************/
  // set the first LUT entry to set the fan to 10% duty cycle
@@ -65,7 +67,7 @@ void loop() {
 
   display.print("Temp E/I: ");display.print(emc2101.getExternalTemperature(),1);display.print("/");display.print(emc2101.getInternalTemperature(),1);display.println(" C");
   display.print("Fan RPM: ");display.print(emc2101.getFanRPM());display.println(" RPM");
-  display.print("PWM: "); display.print(emc2101.getDutyCycle());display.println("");
+  display.print("PWM: "); display.print(emc2101.getDutyCycle());display.println("%");
   delay(100);
 
 

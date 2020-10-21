@@ -93,8 +93,8 @@ public:
   float getExternalTemperature(void);
   int8_t getInternalTemperature(void);
   uint16_t getFanRPM(void);
-  float getDutyCycle(void);
-  void setDutyCycle(float pwm_duty_cycle);
+  uint8_t getDutyCycle(void);
+  void setDutyCycle(uint8_t pwm_duty_cycle);
   bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
   uint16_t getLUT(uint8_t index);
 

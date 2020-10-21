@@ -161,15 +161,6 @@ bool Adafruit_EMC2101::_init(void) {
    hysteresis value"""
  */
 
-/**
- * @brief Get the fan speed setting used while the LUT is being updated and is
- * unavailable or not in use. The speed is  given as the fan's PWM duty cycle
- * represented as a float percentage. The value **roughly** approximates the
- * percentage of the fan's maximum speed"""
- *
- * @return float The current manually set fan duty cycle
- */
-
 bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh,
                               uint8_t fan_pwm) {
   if (index > 7) {
@@ -204,23 +195,41 @@ bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh,
   return true;
 }
 
-float Adafruit_EMC2101::getDutyCycle(void) {
+/**
+ * @brief Get the fan speed setting used while the LUT is being updated and is
+ * unavailable or not in use. The speed is  given as the fan's PWM duty cycle
+ * represented as a float percentage. The value **roughly** approximates the
+ * percentage of the fan's maximum speed"""
+ *
+ * @return float The current manually set fan duty cycle
+ */
+uint8_t Adafruit_EMC2101::getDutyCycle(void) {
   Adafruit_BusIO_Register _fan_setting =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_FAN_SETTING);
 
   uint8_t raw_duty_cycle = _fan_setting.read() & MAX_LUT_SPEED;
-  return (raw_duty_cycle / (float)MAX_LUT_SPEED) * 100;
+  return (uint8_t)((raw_duty_cycle / (float)MAX_LUT_SPEED) * 100);
 }
-void Adafruit_EMC2101::setDutyCycle(float pwm_duty_cycle) {
+/**
+ * @brief Set the fan speed. 
+ * 
+ * 
+ * @param pwm_duty_cycle The  duty cycle percentage as an integer
+
+ * The speed is  given as the fan's PWM duty cycle and **roughly** approximates the
+ * percentage of the fan's maximum speed
+ */
+void Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
   Adafruit_BusIO_Register _fan_setting =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_FAN_SETTING);
-  pwm_duty_cycle /= 100.0;
 
-  uint8_t fan_speed_lsb = (uint8_t)(pwm_duty_cycle * MAX_LUT_SPEED);
-  bool lut_disabled = LUTEnabled();
+  // convert from a percentage to that percentage of the max duty cycle
+  pwm_duty_cycle = (uint8_t) ( 64 * ((float)pwm_duty_cycle / 100));
+
+  bool lut_enabled = LUTEnabled();
   LUTEnabled(false);
-  _fan_setting.write(fan_speed_lsb);
-  LUTEnabled(lut_disabled);
+  _fan_setting.write(pwm_duty_cycle);
+  LUTEnabled(lut_enabled);
 }
 
 bool Adafruit_EMC2101::LUTEnabled(void) {
