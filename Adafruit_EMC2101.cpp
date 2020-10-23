@@ -129,37 +129,49 @@ bool Adafruit_EMC2101::_init(void) {
 
   return true;
 }
-/*            REG STOCKPILE
-
+// /*            REG STOCKPILE
+void Adafruit_EMC2101::holdingPen(void){
 
     // fan spin-upt
-
     // self._spin_tach_limit = False
     // This should be settable by the constructor
-    Adafruit_BusIO_Register _spin_tach_limit = Adafruit_BusIO_Register(i2c_dev,
-   EMC2101_FAN_SPINUP); Adafruit_BusIO_RegisterBits _spin_tach_limit_bits =
-   Adafruit_BusIO_RegisterBits(&_spin_tach_limit, 1, 5);
+    Adafruit_BusIO_Register _spin_tach_limit = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);Adafruit_BusIO_RegisterBits _spin_tach_limit_bits = Adafruit_BusIO_RegisterBits(&_spin_tach_limit, 1, 5);
 
-    Adafruit_BusIO_Register _tach_spinup_limit_lsb =
-   Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_LSB);
-    Adafruit_BusIO_Register _tach_spinup_limit_msb =
-   Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
-    Adafruit_BusIO_Register _spin_drive = Adafruit_BusIO_Register(i2c_dev,
-   EMC2101_FAN_SPINUP); Adafruit_BusIO_RegisterBits _spin_drive_bits =
-   Adafruit_BusIO_RegisterBits(&_spin_drive, 1, 3); Adafruit_BusIO_Register
-   _spin_time = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
-    Adafruit_BusIO_RegisterBits _spin_time_bits =
-   Adafruit_BusIO_RegisterBits(&_spin_time, 1, 0);
+    Adafruit_BusIO_Register _tach_spinup_limit_lsb = Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_LSB);
+    Adafruit_BusIO_Register _tach_spinup_limit_msb = Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
+    Adafruit_BusIO_Register _spin_drive = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP); Adafruit_BusIO_RegisterBits _spin_drive_bits = Adafruit_BusIO_RegisterBits(&_spin_drive, 1, 3); Adafruit_BusIO_Register _spin_time = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
+    Adafruit_BusIO_RegisterBits _spin_time_bits = Adafruit_BusIO_RegisterBits(&_spin_time, 1, 0);
+}
 
-    Adafruit_BusIO_Register lut_temperature_hysteresis =
-   Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS)
-    // """The amount of hysteresis in Degrees celcius of hysteresis applied to
-   temperature readings
-    // used for the LUT. As the temperature drops, the controller will switch to
-   a lower LUT entry when
-    // the measured value is belowthe lower entry's threshold, minus the
-   hysteresis value"""
+/**
+ * @brief Get the amount of hysteresis in Degrees celcius of hysteresis applied to temperature
+ *  readings used for the LUT. As the temperature drops, the controller will switch to a lower
+ *  LUT entry when the measured value is belowthe lower entry's threshold, minus the hysteresis
+ *  value
+ *
+ * @return uint8_t The current LUT hysteresis value
  */
+uint8_t Adafruit_EMC2101::getLUTHysteresis(void){
+
+    Adafruit_BusIO_Register lut_temperature_hysteresis = Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS);
+    return lut_temperature_hysteresis.read();
+
+}
+
+/**
+ * @brief Set the amount of hysteresis in degrees celcius of hysteresis applied to temperature
+ *  readings used for the LUT. As the temperature drops, the controller will switch to a lower
+ *  LUT entry when the measured value is belowthe lower entry's threshold, minus the hysteresis
+ *  value
+ *
+ * @return uint8_t The current LUT hysteresis value
+ */
+bool Adafruit_EMC2101::setLUTHysteresis(uint8_t hysteresis){
+
+    Adafruit_BusIO_Register lut_temperature_hysteresis = Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS);
+    return lut_temperature_hysteresis.write(hysteresis);
+
+}
 
 bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh,
                               uint8_t fan_pwm) {

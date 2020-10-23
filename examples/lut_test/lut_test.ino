@@ -31,9 +31,9 @@ void setup(void) {
   display.setTextSize(1);
   display.setTextColor(WHITE);
   display.setRotation(0);
+
   emc2101.setDutyCycle(50);
-  emc2101.setDutyCycle(60);
-  emc2101.setDutyCycle(75);
+
 
  /************ LUT SETUP ************/
  // set the first LUT entry to set the fan to 10% duty cycle
@@ -52,7 +52,8 @@ void setup(void) {
   emc2101.setLUT(3, 60, 100);
   // Finally we need to enable the LUT to give it control over the fan speed
   emc2101.LUTEnabled(true);
-
+  emc2101.setLUTHysteresis(5); // 5 degree C fudge factor
+  Serial.print("LUT Hysteresis: "); Serial.println(emc2101.getLUTHysteresis());
 
 }
 
@@ -69,6 +70,8 @@ void loop() {
   display.print("Fan RPM: ");display.print(emc2101.getFanRPM());display.println(" RPM");
   display.print("PWM: "); display.print(emc2101.getDutyCycle());display.println("%");
   delay(100);
+  display.print("LUT Hyst: "); display.println(emc2101.getLUTHysteresis());
+
 
 
   display.display();

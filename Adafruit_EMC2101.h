@@ -107,6 +107,10 @@ public:
   bool LUTEnabled(void);
   bool LUTEnabled(bool enable_lut);
 
+  bool setLUTHysteresis(uint8_t hysteresis);
+  uint8_t getLUTHysteresis(void);
+  void holdingPen(void);
+
 private:
   void _read(void);
   bool _init(void);
