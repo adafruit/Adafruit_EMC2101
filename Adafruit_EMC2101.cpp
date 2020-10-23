@@ -94,11 +94,7 @@ bool Adafruit_EMC2101::_init(void) {
   if (!tach_mode_enable_bit.write(true)) {
     return false;
   }
-  Adafruit_BusIO_RegisterBits dac_output_enabled_bit =
-      Adafruit_BusIO_RegisterBits(&reg_config, 1, 4);
-  if (!dac_output_enabled_bit.write(false)) {
-    return false;
-  }
+  DACOutEnabled(false); // output PWM mode by default
   //"""When set, the fan control signal is output as a DC voltage instead of a
   // PWM signal"""
 
@@ -129,8 +125,21 @@ bool Adafruit_EMC2101::_init(void) {
 
   return true;
 }
-// /*            REG STOCKPILE
-void Adafruit_EMC2101::holdingPen(void) {
+
+// TODO: Extend the docs here if/when interrup output support is added
+/**
+ * @brief Configure the fan's spinup behavior when transitioning from
+ * off/minimal speed to a higher speed (except on power up)
+ *
+ * @param spinup_drive The duty cycle to drive the fan with during spin up
+ * @param spinup_time The amount of time to keep the fan at the given drive
+ * setting
+ * @param tach_limit If true, spinup the fan at 100% until the speed is above
+ * the speed set with `setFanMinRPM`. If set, `spinup_drive` and `spinup_time`
+ * are ignored
+ */
+void Adafruit_EMC2101::configFanSpinup(uint8_t spinup_drive,
+                                       uint8_t spinup_time, bool tach_limit) {
 
   // fan spin-upt
   // self._spin_tach_limit = False
@@ -144,6 +153,7 @@ void Adafruit_EMC2101::holdingPen(void) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
   Adafruit_BusIO_RegisterBits _spin_drive_bits =
       Adafruit_BusIO_RegisterBits(&_spin_drive, 1, 3);
+
   Adafruit_BusIO_Register _spin_time =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
   Adafruit_BusIO_RegisterBits _spin_time_bits =
@@ -167,9 +177,12 @@ uint8_t Adafruit_EMC2101::getLUTHysteresis(void) {
 
 /**
  * @brief Set the amount of hysteresis in degrees celcius of hysteresis applied
- * to temperature readings used for the LUT. As the temperature drops, the
- * controller will switch to a lower LUT entry when the measured value is
- * belowthe lower entry's threshold, minus the hysteresis value
+ * to temperature readings used for the LUT.
+ *
+ * @param hysteresis  The hysteresis value in degrees celcius. As the
+ * temperature drops, the controller will switch to a lower LUT entry when the
+ * measured value is `hystersis` degrees below the lower entry's temperature
+ * threshold
  *
  * @return uint8_t The current LUT hysteresis value
  */
@@ -180,6 +193,32 @@ bool Adafruit_EMC2101::setLUTHysteresis(uint8_t hysteresis) {
   return lut_temperature_hysteresis.write(hysteresis);
 }
 
+/**
+ * @brief Create a new mapping between temperature and fan speed in the Look Up
+ * Table. Requires the LUT to be enabled with `LUTEnabled(true)`
+ *
+ * @param index The index in the LUT, from 0-7. Note that the temperature
+ * thresholds should increase with the LUT index, so the temperature value for a
+ * given LUT entry is higher than the temperature for the previous index:
+ * @code
+ * // NO!:
+ * setLUT(0, 30, 25); // 25% PWM @ 30 Degrees C
+ * setLUT(1, 20, 10); // WRONG! 10% PWM @ 20 Degrees C should be before 30
+ * // degrees from index 0 setLUT(2, 40, 50); // 50% PWM @ 40 Degrees C
+ *
+ * // YES:
+ * setLUT(0, 20, 10); // 10% PWM @ 20 Degrees C
+ * setLUT(1, 30, 25); // 25% PWM @ 30 Degrees C
+ * setLUT(2, 40, 50); // 50% PWM @ 40 Degrees C
+ *@endcode
+ *
+ * @param temp_thresh When the temperature is more than this threshold, the fan
+ * will be set to the given PWM value
+ * @param fan_pwm The pwm-based fan speed for the given temperature threshold.
+ * When DAC output is enabled, this determins the percentage of the maximum
+ * output voltage to be used for the given temperature threshold
+ * @return true:success false:failure
+ */
 bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh,
                               uint8_t fan_pwm) {
   if (index > 7) {
@@ -252,6 +291,11 @@ void Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
   LUTEnabled(lut_enabled);
 }
 
+/**
+ * @brief Get the LUT enable status
+ *
+ * @return true: LUT usage enabled false: LUT disabled
+ */
 bool Adafruit_EMC2101::LUTEnabled(void) {
 
   Adafruit_BusIO_Register fan_config =
@@ -261,6 +305,14 @@ bool Adafruit_EMC2101::LUTEnabled(void) {
   return !_lut_disable_bit.read();
 }
 
+/**
+ * @brief Enable or disable the temperaturet to fan speed Look Up Table (LUT)
+ *
+ * @param enable_lut True to enable the LUT, setting the fan speed depending on
+ * the configured temp to speed mapping. False disables the LUT, defaulting to
+ * the speed setting from `setDutyCycle`
+ * @return true:success false: failure
+ */
 bool Adafruit_EMC2101::LUTEnabled(bool enable_lut) {
 
   Adafruit_BusIO_Register fan_config =
@@ -270,6 +322,11 @@ bool Adafruit_EMC2101::LUTEnabled(bool enable_lut) {
   return _lut_disable_bit.write(!enable_lut);
 }
 
+/**
+ * @brief Get the mimnum RPM setting for the attached fan
+ *
+ * @return uint16_t the current minimum RPM setting
+ */
 uint16_t Adafruit_EMC2101::getFanMinRPM(void) {
 
   uint8_t buffer[2];
@@ -282,11 +339,21 @@ uint16_t Adafruit_EMC2101::getFanMinRPM(void) {
 
   int16_t raw_limit = buffer[0] << 8;
   raw_limit |= buffer[1];
-  if(raw_limit == 0xFFFF){
+  if (raw_limit == 0xFFFF) {
     return 0;
   }
-  return EMC2101_FAN_RPM_NUMERATOR/raw_limit;
+  return EMC2101_FAN_RPM_NUMERATOR / raw_limit;
 }
+
+/**
+ * @brief Set the minimum speed of the attached fan
+ *
+ * Used to determine the fan state
+ *
+ * @param min_rpm The minimum speed of the fan. Any setting below this will
+ * return 0 and mark the fan as non-operational
+ * @return true: success false: failure
+ */
 bool Adafruit_EMC2101::setFanMinRPM(uint16_t min_rpm) {
 
   Adafruit_BusIO_Register tach_limit_lsb =
@@ -294,12 +361,21 @@ bool Adafruit_EMC2101::setFanMinRPM(uint16_t min_rpm) {
   Adafruit_BusIO_Register tach_limit_msb =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
   // speed is given in RPM, convert to LSB:
-  uint16_t lsb_value = EMC2101_FAN_RPM_NUMERATOR/min_rpm;
-  if (!tach_limit_lsb.write(lsb_value & 0xFF)) {return false;}
-  if (!tach_limit_msb.write((lsb_value >>8) & 0xFF)) {return false;}
+  uint16_t lsb_value = EMC2101_FAN_RPM_NUMERATOR / min_rpm;
+  if (!tach_limit_lsb.write(lsb_value & 0xFF)) {
+    return false;
+  }
+  if (!tach_limit_msb.write((lsb_value >> 8) & 0xFF)) {
+    return false;
+  }
   return true;
 }
 
+/**
+ * @brief Read the external temperature diode
+ *
+ * @return float the current temperature in degrees celcius
+ */
 float Adafruit_EMC2101::getExternalTemperature(void) {
   // chip doesn't like doing multi-byte reads so we'll get each byte separately
   // and join
@@ -318,6 +394,11 @@ float Adafruit_EMC2101::getExternalTemperature(void) {
   return raw_ext * 0.125;
 }
 
+/**
+ * @brief Read the internal temperature sensor
+ *
+ * @return int8_t the current temperature in degrees celcius
+ */
 int8_t Adafruit_EMC2101::getInternalTemperature(void) {
   // _INTERNAL_TEMP = const(0x00)
   Adafruit_BusIO_Register ext_temp_lsb =
@@ -326,6 +407,11 @@ int8_t Adafruit_EMC2101::getInternalTemperature(void) {
   return (int8_t)ext_temp_lsb.read();
 }
 
+/**
+ * @brief Read the current fan speed in RPM.
+ *
+ * @return uint16_t The current fan speed
+ */
 uint16_t Adafruit_EMC2101::getFanRPM(void) {
   uint8_t buffer[2];
   Adafruit_BusIO_Register fan_speed_lsb =
@@ -338,7 +424,6 @@ uint16_t Adafruit_EMC2101::getFanRPM(void) {
 
   uint16_t raw_ext = buffer[0] << 8;
   raw_ext |= buffer[1];
-  Serial.print("Fan speed raw count: "); Serial.println(raw_ext);
 
   return 5400000 / raw_ext;
 }
@@ -363,6 +448,7 @@ emc2101_rate_t Adafruit_EMC2101::getDataRate(void) {
  * @brief Sets the rate at which pressure and temperature measurements
  *
  * @param new_data_rate The data rate to set. Must be a `emc2101_rate_t`
+ * @return bool true:success false:failure
  */
 bool Adafruit_EMC2101::setDataRate(emc2101_rate_t new_data_rate) {
   Adafruit_BusIO_Register rate_reg =
@@ -373,9 +459,88 @@ bool Adafruit_EMC2101::setDataRate(emc2101_rate_t new_data_rate) {
   return data_rate.write(new_data_rate);
 }
 
-/******************* Adafruit_Sensor functions *****************/
-/*!
- *     @brief  Updates the measurement data for all sensors simultaneously
+/**
+ * @brief Enable or disable outputting the fan control signal as a DC voltage
+ * instead of the default PWM output
+ *
+ * @param enable_dac_out true will enable DAC output, false disables DAC output
+ * @return true:success false: failure
  */
-/**************************************************************************/
-void Adafruit_EMC2101::_read(void) {}
+bool Adafruit_EMC2101::DACOutEnabled(bool enable_dac_out) {
+  Adafruit_BusIO_Register reg_config =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_CONFIG);
+  Adafruit_BusIO_RegisterBits dac_output_enabled_bit =
+      Adafruit_BusIO_RegisterBits(&reg_config, 1, 4);
+  if (!dac_output_enabled_bit.write(enable_dac_out)) {
+    return false;
+  }
+  return true;
+}
+/**
+ * @brief Get the current DAC output enable setting
+ *
+ * @return true: DAC output enabled
+ * @return false DAC output disabled
+ */
+bool Adafruit_EMC2101::DACOutEnabled(void) {
+  Adafruit_BusIO_Register reg_config =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_CONFIG);
+  Adafruit_BusIO_RegisterBits dac_output_enabled_bit =
+      Adafruit_BusIO_RegisterBits(&reg_config, 1, 4);
+  return dac_output_enabled_bit.read();
+}
+
+/**
+ * @brief Get the final PWM frequency and "effective resolution" of the PWM
+ * driver. No effect when DAC output is enabled
+ *
+ * See the datasheet for additional information:
+ * http://ww1.microchip.com/downloads/en/DeviceDoc/2101.pdf
+ *
+ * @return uint8_t The PWM freq register setting
+ */
+uint8_t Adafruit_EMC2101::getPWMFrequency(void) {
+  Adafruit_BusIO_Register pwm_freq_reg =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_FREQ);
+  return pwm_freq_reg.read();
+}
+
+/**
+ * @brief Set the final PWM frequency and "effective resolution" of the PWM
+ * driver. No effect when DAC output is enabled
+ *
+ * See the datasheet for additional information:
+ * http://ww1.microchip.com/downloads/en/DeviceDoc/2101.pdf
+ *
+ * @param pwm_freq The new PWM frequency setting
+ *
+ * @return bool true:success false:failure
+ */
+bool Adafruit_EMC2101::setPWMFrequency(uint8_t pwm_freq) {
+  Adafruit_BusIO_Register pwm_freq_reg =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_FREQ);
+  return pwm_freq_reg.write(pwm_freq);
+}
+
+/**
+ * @brief Get the alternate PWM frequency digide value to use instead of the
+ * clock selection bit when the clock select override is set
+ *
+ * @return uint8_t The alternate divisor setting
+ */
+uint8_t Adafruit_EMC2101::getPWMDivisor(void) {
+  Adafruit_BusIO_Register pwm_divisor_reg =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_DIV);
+  return pwm_divisor_reg.read();
+}
+/**
+ * @brief Get the alternate PWM frequency digide value to use instead of the
+ * clock selection bit when the clock select override is set
+ * @param pwm_divisor The alternate divisor setting
+ * @return true:success false: failure
+ */
+bool Adafruit_EMC2101::setPWMDivisor(uint8_t pwm_divisor) {
+  Adafruit_BusIO_Register pwm_divisor_reg =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_DIV);
+  return pwm_divisor_reg.write(pwm_divisor);
+}
