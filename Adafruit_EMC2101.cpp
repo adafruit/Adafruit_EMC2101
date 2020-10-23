@@ -130,47 +130,54 @@ bool Adafruit_EMC2101::_init(void) {
   return true;
 }
 // /*            REG STOCKPILE
-void Adafruit_EMC2101::holdingPen(void){
+void Adafruit_EMC2101::holdingPen(void) {
 
-    // fan spin-upt
-    // self._spin_tach_limit = False
-    // This should be settable by the constructor
-    Adafruit_BusIO_Register _spin_tach_limit = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);Adafruit_BusIO_RegisterBits _spin_tach_limit_bits = Adafruit_BusIO_RegisterBits(&_spin_tach_limit, 1, 5);
+  // fan spin-upt
+  // self._spin_tach_limit = False
+  // This should be settable by the constructor
+  Adafruit_BusIO_Register _spin_tach_limit =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
+  Adafruit_BusIO_RegisterBits _spin_tach_limit_bits =
+      Adafruit_BusIO_RegisterBits(&_spin_tach_limit, 1, 5);
 
-    Adafruit_BusIO_Register _tach_spinup_limit_lsb = Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_LSB);
-    Adafruit_BusIO_Register _tach_spinup_limit_msb = Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
-    Adafruit_BusIO_Register _spin_drive = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP); Adafruit_BusIO_RegisterBits _spin_drive_bits = Adafruit_BusIO_RegisterBits(&_spin_drive, 1, 3); Adafruit_BusIO_Register _spin_time = Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
-    Adafruit_BusIO_RegisterBits _spin_time_bits = Adafruit_BusIO_RegisterBits(&_spin_time, 1, 0);
+  Adafruit_BusIO_Register _spin_drive =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
+  Adafruit_BusIO_RegisterBits _spin_drive_bits =
+      Adafruit_BusIO_RegisterBits(&_spin_drive, 1, 3);
+  Adafruit_BusIO_Register _spin_time =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
+  Adafruit_BusIO_RegisterBits _spin_time_bits =
+      Adafruit_BusIO_RegisterBits(&_spin_time, 1, 0);
 }
 
 /**
- * @brief Get the amount of hysteresis in Degrees celcius of hysteresis applied to temperature
- *  readings used for the LUT. As the temperature drops, the controller will switch to a lower
- *  LUT entry when the measured value is belowthe lower entry's threshold, minus the hysteresis
- *  value
+ * @brief Get the amount of hysteresis in Degrees celcius of hysteresis applied
+ * to temperature readings used for the LUT. As the temperature drops, the
+ * controller will switch to a lower LUT entry when the measured value is
+ * belowthe lower entry's threshold, minus the hysteresis value
  *
  * @return uint8_t The current LUT hysteresis value
  */
-uint8_t Adafruit_EMC2101::getLUTHysteresis(void){
+uint8_t Adafruit_EMC2101::getLUTHysteresis(void) {
 
-    Adafruit_BusIO_Register lut_temperature_hysteresis = Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS);
-    return lut_temperature_hysteresis.read();
-
+  Adafruit_BusIO_Register lut_temperature_hysteresis =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS);
+  return lut_temperature_hysteresis.read();
 }
 
 /**
- * @brief Set the amount of hysteresis in degrees celcius of hysteresis applied to temperature
- *  readings used for the LUT. As the temperature drops, the controller will switch to a lower
- *  LUT entry when the measured value is belowthe lower entry's threshold, minus the hysteresis
- *  value
+ * @brief Set the amount of hysteresis in degrees celcius of hysteresis applied
+ * to temperature readings used for the LUT. As the temperature drops, the
+ * controller will switch to a lower LUT entry when the measured value is
+ * belowthe lower entry's threshold, minus the hysteresis value
  *
  * @return uint8_t The current LUT hysteresis value
  */
-bool Adafruit_EMC2101::setLUTHysteresis(uint8_t hysteresis){
+bool Adafruit_EMC2101::setLUTHysteresis(uint8_t hysteresis) {
 
-    Adafruit_BusIO_Register lut_temperature_hysteresis = Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS);
-    return lut_temperature_hysteresis.write(hysteresis);
-
+  Adafruit_BusIO_Register lut_temperature_hysteresis =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_LUT_HYSTERESIS);
+  return lut_temperature_hysteresis.write(hysteresis);
 }
 
 bool Adafruit_EMC2101::setLUT(uint8_t index, uint8_t temp_thresh,
@@ -223,12 +230,13 @@ uint8_t Adafruit_EMC2101::getDutyCycle(void) {
   return (uint8_t)((raw_duty_cycle / (float)MAX_LUT_SPEED) * 100);
 }
 /**
- * @brief Set the fan speed. 
- * 
- * 
+ * @brief Set the fan speed.
+ *
+ *
  * @param pwm_duty_cycle The  duty cycle percentage as an integer
 
- * The speed is  given as the fan's PWM duty cycle and **roughly** approximates the
+ * The speed is  given as the fan's PWM duty cycle and **roughly** approximates
+ the
  * percentage of the fan's maximum speed
  */
 void Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
@@ -236,7 +244,7 @@ void Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_FAN_SETTING);
 
   // convert from a percentage to that percentage of the max duty cycle
-  pwm_duty_cycle = (uint8_t) ( 64 * ((float)pwm_duty_cycle / 100));
+  pwm_duty_cycle = (uint8_t)(64 * ((float)pwm_duty_cycle / 100));
 
   bool lut_enabled = LUTEnabled();
   LUTEnabled(false);
@@ -262,8 +270,35 @@ bool Adafruit_EMC2101::LUTEnabled(bool enable_lut) {
   return _lut_disable_bit.write(!enable_lut);
 }
 
-uint16_t Adafruit_EMC2101::getFanMaxRPM(void) {}
-void Adafruit_EMC2101::setFanMaxRPM(float uint16_t) {}
+uint16_t Adafruit_EMC2101::getFanMinRPM(void) {
+
+  uint8_t buffer[2];
+  Adafruit_BusIO_Register tach_limit_lsb =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_LSB);
+  Adafruit_BusIO_Register tach_limit_msb =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
+  tach_limit_msb.read(buffer);
+  tach_limit_lsb.read(buffer + 1);
+
+  int16_t raw_limit = buffer[0] << 8;
+  raw_limit |= buffer[1];
+  if(raw_limit == 0xFFFF){
+    return 0;
+  }
+  return EMC2101_FAN_RPM_NUMERATOR/raw_limit;
+}
+bool Adafruit_EMC2101::setFanMinRPM(uint16_t min_rpm) {
+
+  Adafruit_BusIO_Register tach_limit_lsb =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_LSB);
+  Adafruit_BusIO_Register tach_limit_msb =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
+  // speed is given in RPM, convert to LSB:
+  uint16_t lsb_value = EMC2101_FAN_RPM_NUMERATOR/min_rpm;
+  if (!tach_limit_lsb.write(lsb_value & 0xFF)) {return false;}
+  if (!tach_limit_msb.write((lsb_value >>8) & 0xFF)) {return false;}
+  return true;
+}
 
 float Adafruit_EMC2101::getExternalTemperature(void) {
   // chip doesn't like doing multi-byte reads so we'll get each byte separately
@@ -303,6 +338,7 @@ uint16_t Adafruit_EMC2101::getFanRPM(void) {
 
   uint16_t raw_ext = buffer[0] << 8;
   raw_ext |= buffer[1];
+  Serial.print("Fan speed raw count: "); Serial.println(raw_ext);
 
   return 5400000 / raw_ext;
 }

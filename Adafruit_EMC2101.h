@@ -54,7 +54,7 @@
 #define MAX_LUT_TEMP 0x7F  //  7-bit
 
 #define EMC2101_I2C_ADDR 0x4C
-#define EMC2101_FAN_RPM_DIVISOR 5400000
+#define EMC2101_FAN_RPM_NUMERATOR 5400000
 #define _TEMP_LSB 0.125
 
 #define MAX_LUT_SPEED 0x3F ///< 6-bit value
@@ -93,16 +93,18 @@ public:
   float getExternalTemperature(void);
   int8_t getInternalTemperature(void);
   uint16_t getFanRPM(void);
+
   uint8_t getDutyCycle(void);
   void setDutyCycle(uint8_t pwm_duty_cycle);
-  bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
-  uint16_t getLUT(uint8_t index);
 
-  uint16_t getFanMaxRPM(void);
-  void setFanMaxRPM(float uint16_t);
+  uint16_t getFanMinRPM(void);
+  bool setFanMinRPM(uint16_t min_rpm);
 
   emc2101_rate_t getDataRate(void);
   bool setDataRate(emc2101_rate_t data_rate);
+
+  bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
+  uint16_t getLUT(uint8_t index);
 
   bool LUTEnabled(void);
   bool LUTEnabled(bool enable_lut);
