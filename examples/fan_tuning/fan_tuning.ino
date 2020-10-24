@@ -55,12 +55,9 @@ void loop() {
   Serial.println("");
   delay(100);
 
+  Serial.println("Comparing default behavior of fan speed to RPM");
 
-  // display.print("Ext Temp: ");display.print(emc2101.getExternalTemperature());display.println(" deg C");
-  // display.print("Int Temp: ");display.print(emc2101.getInternalTemperature());display.println(" deg C");
-  // display.print("Fan RPM: ");display.print(emc2101.getFanRPM());display.println(" RPM");
-  // display.print("Pot: "); display.print(sliderPercentage());
-  // display.print("PWM: "); display.print(emc2101.getDutyCycle());display.println("");
+  emc2101.invertFanSpeed(false);
   delay(100);
   for(int i = 0; i<10; i++){
     Serial.print("Setting pwm to "); Serial.println(i+5);
@@ -69,10 +66,24 @@ void loop() {
     Serial.print("Fan RPM:: ");
     Serial.print(emc2101.getFanRPM());
     Serial.println(" RPM");
+    Serial.print("Fan PWM: ");Serial.print(emc2101.getDutyCycle());
+    Serial.println(" %");
+    delay(2000);
+  }
+  Serial.println("\nInverting fan speed polarity...");
+  emc2101.invertFanSpeed(true);
+  for(int i = 0; i<10; i++){
+    Serial.print("Setting pwm to "); Serial.println(i+5);
+    emc2101.setDutyCycle(i+5);
+    delay(4000);
+    Serial.print("Fan RPM:: ");
+    Serial.print(emc2101.getFanRPM());
+    Serial.println(" RPM");
     Serial.print("Fan RPM:: ");Serial.print(emc2101.getDutyCycle());
     Serial.println(" %");
     delay(2000);
   }
+
 
 
   // display.display();

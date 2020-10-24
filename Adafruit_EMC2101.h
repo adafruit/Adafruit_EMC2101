@@ -112,7 +112,7 @@ public:
   uint16_t getFanRPM(void);
 
   uint8_t getDutyCycle(void);
-  void setDutyCycle(uint8_t pwm_duty_cycle);
+  bool setDutyCycle(uint8_t pwm_duty_cycle);
 
   uint16_t getFanMinRPM(void);
   bool setFanMinRPM(uint16_t min_rpm);
@@ -137,6 +137,8 @@ public:
 
   bool enableForcedTemperature(bool enable_forced);
   bool setForcedTemperature(int8_t forced_temperature);
+  int8_t getForcedTemperature(void);
+
   bool enableTachInput(bool tach_enable);
   bool invertFanSpeed(bool invert_speed);
 

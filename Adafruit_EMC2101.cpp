@@ -86,6 +86,7 @@ bool Adafruit_EMC2101::_init(void) {
   }
 
   enableTachInput(true);
+  invertFanSpeed(false);
   DACOutEnabled(false); // output PWM mode by default
   LUTEnabled(false);
   setDutyCycle(100.0);
@@ -136,6 +137,7 @@ bool Adafruit_EMC2101::invertFanSpeed(bool invert_speed) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_CONFIG);
   Adafruit_BusIO_RegisterBits invert_fan_output_bit =
       Adafruit_BusIO_RegisterBits(&fan_config, 1, 4);
+  invert_fan_output_bit.write(invert_speed);
 }
 
 /**
@@ -179,7 +181,7 @@ bool Adafruit_EMC2101::configFanSpinup(uint8_t spinup_drive,
  *
  * @return true:success false: failure
  */
-void Adafruit_EMC2101::configFanSpinup(bool tach_spinup) {
+bool Adafruit_EMC2101::configFanSpinup(bool tach_spinup) {
 
   // fan spin-upt
   // self._spin_tach_limit = False
@@ -308,8 +310,9 @@ uint8_t Adafruit_EMC2101::getDutyCycle(void) {
  * The speed is  given as the fan's PWM duty cycle and **roughly** approximates
  the
  * percentage of the fan's maximum speed
+ * @return true: success false: failure
  */
-void Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
+bool Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
   Adafruit_BusIO_Register _fan_setting =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_FAN_SETTING);
 
@@ -415,6 +418,9 @@ float Adafruit_EMC2101::getExternalTemperature(void) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_EXTERNAL_TEMP_LSB);
   Adafruit_BusIO_Register ext_temp_msb =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_EXTERNAL_TEMP_MSB);
+
+  // Read **MSB** first to match 'Data Read Interlock' behavoior from 6.1 of
+  // datasheet
   ext_temp_msb.read(buffer);
   ext_temp_lsb.read(buffer + 1);
 
@@ -450,8 +456,10 @@ uint16_t Adafruit_EMC2101::getFanRPM(void) {
   Adafruit_BusIO_Register fan_speed_msb =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_MSB);
 
-  fan_speed_msb.read(buffer);
+  // Read LSB first to match 'Data Read Interlock' behavoior from 6.1 of
+  // datasheet
   fan_speed_lsb.read(buffer + 1);
+  fan_speed_msb.read(buffer);
 
   uint16_t raw_ext = buffer[0] << 8;
   raw_ext |= buffer[1];
@@ -522,7 +530,7 @@ bool Adafruit_EMC2101::DACOutEnabled(void) {
 }
 
 /**
- * @brief Get the final PWM frequency and "effective resolution" of the PWM
+ * @brief Read the final PWM frequency and "effective resolution" of the PWM
  * driver. No effect when DAC output is enabled
  *
  * See the datasheet for additional information:
@@ -531,7 +539,7 @@ bool Adafruit_EMC2101::DACOutEnabled(void) {
  * @return uint8_t The PWM freq register setting
  */
 uint8_t Adafruit_EMC2101::getPWMFrequency(void) {
-  Adafruit_BusIO_Register forced_temp_reg =
+  Adafruit_BusIO_Register pwm_freq_reg =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_FREQ);
   return pwm_freq_reg.read();
 }
@@ -591,8 +599,7 @@ bool Adafruit_EMC2101::enableForcedTemperature(bool enable_forced) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_CONFIG);
   Adafruit_BusIO_RegisterBits forced_temp_en_bit =
       Adafruit_BusIO_RegisterBits(&fan_config, 1, 6);
-  //"""When True, the external temperature measurement will always be read as
-  // the value in `forced_ext_temp`"""
+  return forced_temp_en_bit.write(enable_forced);
 }
 
 /**
@@ -606,10 +613,23 @@ bool Adafruit_EMC2101::enableForcedTemperature(bool enable_forced) {
 bool Adafruit_EMC2101::setForcedTemperature(int8_t forced_temperature) {
 
   Adafruit_BusIO_Register forced_temp_reg =
-      Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_FREQ);
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_TEMP_FORCE);
   return forced_temp_reg.write(forced_temperature);
 }
 
+/**
+ * @brief Get the alternate temperature to use to look up a fan setting in the
+ * look up table
+ *
+ * @return int8_t The alternative temperature reading used for LUT
+ * lookups
+ */
+int8_t Adafruit_EMC2101::getForcedTemperature(void) {
+
+  Adafruit_BusIO_Register forced_temp_reg =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_TEMP_FORCE);
+  return forced_temp_reg.read();
+}
 /*
 TODOS:
 force enable & accessors
@@ -624,6 +644,5 @@ diode config
 
 disable/shutodwn
 - one shot read
-
 
 */

@@ -49,32 +49,37 @@ void setup(void) {
   emc2101.setLUT(1, 30, 20);
 
   /// the highest temperature threshold goes last
-  emc2101.setLUT(3, 60, 100);
+  emc2101.setLUT(2, 60, 100);
   // Finally we need to enable the LUT to give it control over the fan speed
   emc2101.LUTEnabled(true);
   emc2101.setLUTHysteresis(5); // 5 degree C fudge factor
   Serial.print("LUT Hysteresis: "); Serial.println(emc2101.getLUTHysteresis());
 
+  Serial.print("LUT enabled: "); Serial.println(emc2101.LUTEnabled());
+
+  // use these settings to hard-code the temperature to test the LUT
+  Serial.print("enable force success: "); Serial.println(emc2101.enableForcedTemperature(true));
+
 }
 
 void loop() {
-  display.clearDisplay();
-  display.setCursor(0,0);
+  Serial.print("Forcing to 25 degrees: ");
+  emc2101.setForcedTemperature(25);
+  Serial.print("Forced Temperature: ");Serial.print(emc2101.getForcedTemperature());Serial.println(" degrees C");
+ delay(3000);
 
-  Serial.print("External Temperature: ");Serial.print(emc2101.getExternalTemperature());Serial.println(" degrees C");
-
-  Serial.print("Internal Temperature: ");Serial.print(emc2101.getInternalTemperature());Serial.println(" degrees C");
+  Serial.print("PWM: "); Serial.print(emc2101.getDutyCycle());Serial.println("%");
   Serial.print("Fan RPM:: ");Serial.print(emc2101.getFanRPM());Serial.println(" RPM");
+  Serial.println("");
 
-  display.print("Temp E/I: ");display.print(emc2101.getExternalTemperature(),1);display.print("/");display.print(emc2101.getInternalTemperature(),1);display.println(" C");
-  display.print("Fan RPM: ");display.print(emc2101.getFanRPM());display.println(" RPM");
-  display.print("PWM: "); display.print(emc2101.getDutyCycle());display.println("%");
-  delay(100);
-  display.print("LUT Hyst: "); display.println(emc2101.getLUTHysteresis());
+  Serial.print("Forcing to 100 degrees: ");
+  emc2101.setForcedTemperature(100);
+  Serial.print("Forced Temperature: ");Serial.print(emc2101.getForcedTemperature());
+  Serial.println(" degrees C");
+  delay(3000);
 
-
-
-  display.display();
-  delay(100);
+  Serial.print("PWM: "); Serial.print(emc2101.getDutyCycle());Serial.println("%");
+  Serial.print("Fan RPM:: ");Serial.print(emc2101.getFanRPM());Serial.println(" RPM");
+  Serial.println("");
 
 }
