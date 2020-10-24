@@ -71,9 +71,7 @@ bool Adafruit_EMC2101::begin(uint8_t i2c_address, TwoWire *wire) {
 
   return _init();
 }
-
 /*!  @brief Initializer for post i2c/spi init
- *   @param sensor_id Optional unique ID for the sensor set
  *   @returns True if chip identified and initialized
  */
 bool Adafruit_EMC2101::_init(void) {
@@ -87,77 +85,110 @@ bool Adafruit_EMC2101::_init(void) {
     return false;
   }
 
-  Adafruit_BusIO_Register reg_config =
-      Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_CONFIG);
-  Adafruit_BusIO_RegisterBits tach_mode_enable_bit =
-      Adafruit_BusIO_RegisterBits(&reg_config, 1, 2);
-  if (!tach_mode_enable_bit.write(true)) {
-    return false;
-  }
+  enableTachInput(true);
   DACOutEnabled(false); // output PWM mode by default
-  //"""When set, the fan control signal is output as a DC voltage instead of a
-  // PWM signal"""
-
   LUTEnabled(false);
   setDutyCycle(100.0);
-  // setFanMaxRPM(1700); // from constructor
 
-  Adafruit_BusIO_Register fan_config =
-      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_CONFIG);
-  Adafruit_BusIO_RegisterBits forced_temp_en_bit =
-      Adafruit_BusIO_RegisterBits(&fan_config, 1, 6);
-  //"""When True, the external temperature measurement will always be read as
-  // the value in `forced_ext_temp`"""
+  enableForcedTemperature(false);
 
-  forced_temp_en_bit.write(false);
-
-  Adafruit_BusIO_RegisterBits fan_pwm_clock_override =
-      Adafruit_BusIO_RegisterBits(&fan_config, 1, 2);
-  fan_pwm_clock_override.write(true);
+  // Adafruit_BusIO_RegisterBits fan_pwm_clock_override =
+  //     Adafruit_BusIO_RegisterBits(&fan_config, 1, 2);
+  // fan_pwm_clock_override.write(true);
 
   // Set to highest rate
   setDataRate(EMC2101_RATE_32_HZ);
-
-  Adafruit_BusIO_RegisterBits invert_fan_output_bit =
-      Adafruit_BusIO_RegisterBits(&fan_config, 1, 4);
   //"""When set to True, the magnitude of the fan output signal is inverted,
   // making 0 the maximum
 
   return true;
 }
 
-// TODO: Extend the docs here if/when interrup output support is added
+/**
+ * @brief Enable using the TACH/ALERT pin as an input to read the fan speed
+ * signal from a 4-pin fan
+ *
+ * @param tach_enable true: to enable tach signal input, false to disable and
+ * use the tach pin as interrupt & status output
+ * @return true: sucess false: failure
+ */
+bool Adafruit_EMC2101::enableTachInput(bool tach_enable) {
+  Adafruit_BusIO_Register reg_config =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_CONFIG);
+  Adafruit_BusIO_RegisterBits tach_mode_enable_bit =
+      Adafruit_BusIO_RegisterBits(&reg_config, 1, 2);
+  return tach_mode_enable_bit.write(tach_enable);
+}
+
+/**
+ * @brief Set the cotroller to interperate fan speed settings opposite of the
+ * normal behavior
+ *
+ * @param invert_speed If true, fan duty cycle / DAC value settings will work
+ * backwards; Setting the highest value (100) will set the fan to it's lowest
+ * PWM value, and setting the fan to the lowest value (0) will set the fan
+ * output to it's highest setting.
+ * @return true:sucess false:failure
+ */
+bool Adafruit_EMC2101::invertFanSpeed(bool invert_speed) {
+
+  Adafruit_BusIO_Register fan_config =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_CONFIG);
+  Adafruit_BusIO_RegisterBits invert_fan_output_bit =
+      Adafruit_BusIO_RegisterBits(&fan_config, 1, 4);
+}
+
 /**
  * @brief Configure the fan's spinup behavior when transitioning from
  * off/minimal speed to a higher speed (except on power up)
  *
  * @param spinup_drive The duty cycle to drive the fan with during spin up
+ * **defaults to 100%**
+ *
  * @param spinup_time The amount of time to keep the fan at the given drive
- * setting
- * @param tach_limit If true, spinup the fan at 100% until the speed is above
- * the speed set with `setFanMinRPM`. If set, `spinup_drive` and `spinup_time`
- * are ignored
+ * setting. **Defaults to 3.2 seconds**
+ *
+ * @return true:success false: failure
  */
-void Adafruit_EMC2101::configFanSpinup(uint8_t spinup_drive,
-                                       uint8_t spinup_time, bool tach_limit) {
+bool Adafruit_EMC2101::configFanSpinup(uint8_t spinup_drive,
+                                       uint8_t spinup_time) {
+
+  Adafruit_BusIO_Register spin_config =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
+
+  Adafruit_BusIO_RegisterBits _spin_drive_bits =
+      Adafruit_BusIO_RegisterBits(&spin_config, 2, 3);
+  if (!_spin_drive_bits.write(spinup_drive)) {
+    return false;
+  }
+
+  Adafruit_BusIO_RegisterBits _spin_time_bits =
+      Adafruit_BusIO_RegisterBits(&spin_config, 3, 0);
+  if (!_spin_drive_bits.write(spinup_time)) {
+    return false;
+  }
+}
+
+/**
+ * @brief Configure the fan's spinup behavior when transitioning from
+ * off/minimal speed to a higher speed (except on power up)
+ *
+ * @param tach_spinup If true, drive the fan at 100% until the speed is above
+ * the speed set with `setFanMinRPM`. If previously set, `spinup_drive` and
+ * `spinup_time` are ignored
+ *
+ * @return true:success false: failure
+ */
+void Adafruit_EMC2101::configFanSpinup(bool tach_spinup) {
 
   // fan spin-upt
   // self._spin_tach_limit = False
   // This should be settable by the constructor
-  Adafruit_BusIO_Register _spin_tach_limit =
+  Adafruit_BusIO_Register spin_config =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
-  Adafruit_BusIO_RegisterBits _spin_tach_limit_bits =
-      Adafruit_BusIO_RegisterBits(&_spin_tach_limit, 1, 5);
-
-  Adafruit_BusIO_Register _spin_drive =
-      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
-  Adafruit_BusIO_RegisterBits _spin_drive_bits =
-      Adafruit_BusIO_RegisterBits(&_spin_drive, 1, 3);
-
-  Adafruit_BusIO_Register _spin_time =
-      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_SPINUP);
-  Adafruit_BusIO_RegisterBits _spin_time_bits =
-      Adafruit_BusIO_RegisterBits(&_spin_time, 1, 0);
+  Adafruit_BusIO_RegisterBits tach_spinup_en =
+      Adafruit_BusIO_RegisterBits(&spin_config, 1, 5);
+  return tach_spinup_en.write(tach_spinup);
 }
 
 /**
@@ -500,7 +531,7 @@ bool Adafruit_EMC2101::DACOutEnabled(void) {
  * @return uint8_t The PWM freq register setting
  */
 uint8_t Adafruit_EMC2101::getPWMFrequency(void) {
-  Adafruit_BusIO_Register pwm_freq_reg =
+  Adafruit_BusIO_Register forced_temp_reg =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_FREQ);
   return pwm_freq_reg.read();
 }
@@ -544,3 +575,55 @@ bool Adafruit_EMC2101::setPWMDivisor(uint8_t pwm_divisor) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_DIV);
   return pwm_divisor_reg.write(pwm_divisor);
 }
+
+/**
+ * @brief Force the LUT to use the temperature set by `setForcedTemperature`.
+ *
+ * This can be used to use the LUT to set the fan speed based on a different
+ * source than the external temperature diode. This can also be used to verify
+ * LUT configuration
+ *
+ * @param enable_forced True to force the LUT to use the forced temperature
+ * @return true: success false: failure
+ */
+bool Adafruit_EMC2101::enableForcedTemperature(bool enable_forced) {
+  Adafruit_BusIO_Register fan_config =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_CONFIG);
+  Adafruit_BusIO_RegisterBits forced_temp_en_bit =
+      Adafruit_BusIO_RegisterBits(&fan_config, 1, 6);
+  //"""When True, the external temperature measurement will always be read as
+  // the value in `forced_ext_temp`"""
+}
+
+/**
+ * @brief Set the alternate temperature to use to look up a fan setting in the
+ * look up table
+ *
+ * @param forced_temperature The alternative temperature reading used for LUT
+ * lookups.
+ * @return true: success false: falure
+ */
+bool Adafruit_EMC2101::setForcedTemperature(int8_t forced_temperature) {
+
+  Adafruit_BusIO_Register forced_temp_reg =
+      Adafruit_BusIO_Register(i2c_dev, EMC2101_PWM_FREQ);
+  return forced_temp_reg.write(forced_temperature);
+}
+
+/*
+TODOS:
+force enable & accessors
+temp filter
+diode faults
+alerts
+- interrupt output pin and register/INT status accessors
+- fault queue
+diode config
+- ideality
+- beta correction
+
+disable/shutodwn
+- one shot read
+
+
+*/

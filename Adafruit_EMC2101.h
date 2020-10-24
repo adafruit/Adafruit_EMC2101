@@ -99,9 +99,14 @@ public:
 
   bool begin(uint8_t i2c_addr = EMC2101_I2CADDR_DEFAULT, TwoWire *wire = &Wire);
 
-  void configFanSpinup(uint8_t spinup_drive, uint8_t spinup_time,
-                       bool tach_limit);
+  // Enable/disable & status functions:
+  bool LUTEnabled(void);
+  bool LUTEnabled(bool enable_lut);
 
+  bool DACOutEnabled(bool enable_dac_out);
+  bool DACOutEnabled(void);
+
+  // Accessors:
   float getExternalTemperature(void);
   int8_t getInternalTemperature(void);
   uint16_t getFanRPM(void);
@@ -118,20 +123,22 @@ public:
   bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
   // add a "clear" flag to set back to default
 
-  bool LUTEnabled(void);
-  bool LUTEnabled(bool enable_lut);
-
-  bool DACOutEnabled(bool enable_dac_out);
-  bool DACOutEnabled(void);
-
   uint8_t getPWMFrequency(void);
   bool setPWMFrequency(uint8_t pwm_freq);
 
   uint8_t getPWMDivisor(void);
-  bool setPWMDivisor(uint8_t pwm_freq);
+  bool setPWMDivisor(uint8_t pwm_divisor);
 
   bool setLUTHysteresis(uint8_t hysteresis);
   uint8_t getLUTHysteresis(void);
+
+  bool configFanSpinup(uint8_t spinup_drive, uint8_t spinup_time);
+  bool configFanSpinup(bool tach_spinup);
+
+  bool enableForcedTemperature(bool enable_forced);
+  bool setForcedTemperature(int8_t forced_temperature);
+  bool enableTachInput(bool tach_enable);
+  bool invertFanSpeed(bool invert_speed);
 
 private:
   bool _init(void);
@@ -143,7 +150,7 @@ private:
 
 // TODO:
 /*
-spinup drive and time
 PWM params
-DAC out enable
+TEST Fan Setting register what happens if setting is set while in LUT mode; does
+LUT overwrite it?
 */
