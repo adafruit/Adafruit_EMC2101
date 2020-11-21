@@ -129,6 +129,8 @@ public:
   uint8_t getPWMDivisor(void);
   bool setPWMDivisor(uint8_t pwm_divisor);
 
+  bool configPWMClock(bool clksel, bool clkovr);
+
   bool setLUTHysteresis(uint8_t hysteresis);
   uint8_t getLUTHysteresis(void);
 
