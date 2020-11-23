@@ -1,12 +1,9 @@
 // Basic demo for readings from Adafruit EMC2101
 #include <Wire.h>
 #include <Adafruit_EMC2101.h>
-#include <Adafruit_SSD1306.h>
 
-#define SLIDER_PIN A0
 Adafruit_EMC2101  emc2101;
-Adafruit_SSD1306 display = Adafruit_SSD1306(128, 32, &Wire);
-float slider_val = 10.0;
+
 void setup(void) {
   Serial.begin(115200);
   while (!Serial) delay(10);     // will pause Zero, Leonardo, etc until serial console opens
@@ -20,20 +17,7 @@ void setup(void) {
   }
 
   Serial.println("EMC2101 Found!");
-    // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally
-  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C)) { // Address 0x3C for 128x32
-    Serial.println(F("SSD1306 allocation failed"));
-    for(;;); // Don't proceed, loop forever
-  }
-  display.display();
-  delay(500); // Pause for half second
-
-  display.setTextSize(1);
-  display.setTextColor(WHITE);
-  display.setRotation(0);
-
   emc2101.setDutyCycle(50);
-
 
  /************ LUT SETUP ************/
  // set the first LUT entry to set the fan to 10% duty cycle
@@ -50,6 +34,7 @@ void setup(void) {
 
   /// the highest temperature threshold goes last
   emc2101.setLUT(2, 60, 100);
+
   // Finally we need to enable the LUT to give it control over the fan speed
   emc2101.LUTEnabled(true);
   emc2101.setLUTHysteresis(5); // 5 degree C fudge factor
@@ -66,6 +51,7 @@ void loop() {
   Serial.print("Forcing to 25 degrees: ");
   emc2101.setForcedTemperature(25);
   Serial.print("Forced Temperature: ");Serial.print(emc2101.getForcedTemperature());Serial.println(" degrees C");
+
  delay(3000);
 
   Serial.print("PWM: "); Serial.print(emc2101.getDutyCycle());Serial.println("%");
