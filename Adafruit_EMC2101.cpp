@@ -156,7 +156,7 @@ bool Adafruit_EMC2101::configPWMClock(bool clksel, bool clkovr) {
       Adafruit_BusIO_RegisterBits(&fan_config, 1, 3);
   clksel_bit.write(clksel);
   Adafruit_BusIO_RegisterBits clkovr_bit =
-      Adafruit_BusIO_RegisterBits(&fan_config, 1, 3);
+      Adafruit_BusIO_RegisterBits(&fan_config, 1, 2);
   clkovr_bit.write(clksel);
 }
 
