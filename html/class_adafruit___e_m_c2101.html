@@ -88,7 +88,7 @@ Public Member Functions</h2></td></tr>
 <tr class="memdesc:ab9321add2bb3c51a329d4a35c517ad14"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the LUT enable status.  <a href="#ab9321add2bb3c51a329d4a35c517ad14">More...</a><br /></td></tr>
 <tr class="separator:ab9321add2bb3c51a329d4a35c517ad14"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a48b50ac2a10bb4d1db610c2e7664533b"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___e_m_c2101.html#a48b50ac2a10bb4d1db610c2e7664533b">LUTEnabled</a> (bool enable_lut)</td></tr>
-<tr class="memdesc:a48b50ac2a10bb4d1db610c2e7664533b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable or disable the temperaturet to fan speed Look Up Table (LUT)  <a href="#a48b50ac2a10bb4d1db610c2e7664533b">More...</a><br /></td></tr>
+<tr class="memdesc:a48b50ac2a10bb4d1db610c2e7664533b"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable or disable the temperature-to-fan speed Look Up Table (LUT)  <a href="#a48b50ac2a10bb4d1db610c2e7664533b">More...</a><br /></td></tr>
 <tr class="separator:a48b50ac2a10bb4d1db610c2e7664533b"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:a01a5564c14a494b99e2d0a658ce0ee6e"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___e_m_c2101.html#a01a5564c14a494b99e2d0a658ce0ee6e">DACOutEnabled</a> (bool enable_dac_out)</td></tr>
 <tr class="memdesc:a01a5564c14a494b99e2d0a658ce0ee6e"><td class="mdescLeft">&#160;</td><td class="mdescRight">Enable or disable outputting the fan control signal as a DC voltage instead of the default PWM output.  <a href="#a01a5564c14a494b99e2d0a658ce0ee6e">More...</a><br /></td></tr>
@@ -138,6 +138,9 @@ Public Member Functions</h2></td></tr>
 <tr class="memitem:a3cac4e6e84668f6e9d4d0669278cc1a7"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___e_m_c2101.html#a3cac4e6e84668f6e9d4d0669278cc1a7">setPWMDivisor</a> (uint8_t pwm_divisor)</td></tr>
 <tr class="memdesc:a3cac4e6e84668f6e9d4d0669278cc1a7"><td class="mdescLeft">&#160;</td><td class="mdescRight">Get the alternate PWM frequency digide value to use instead of the clock selection bit when the clock select override is set.  <a href="#a3cac4e6e84668f6e9d4d0669278cc1a7">More...</a><br /></td></tr>
 <tr class="separator:a3cac4e6e84668f6e9d4d0669278cc1a7"><td class="memSeparator" colspan="2">&#160;</td></tr>
+<tr class="memitem:a162edee3286c90e0000c6d94560dd2e8"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___e_m_c2101.html#a162edee3286c90e0000c6d94560dd2e8">configPWMClock</a> (bool clksel, bool clkovr)</td></tr>
+<tr class="memdesc:a162edee3286c90e0000c6d94560dd2e8"><td class="mdescLeft">&#160;</td><td class="mdescRight">Configure the PWM clock by selecting the clock source and overflow bit.  <a href="#a162edee3286c90e0000c6d94560dd2e8">More...</a><br /></td></tr>
+<tr class="separator:a162edee3286c90e0000c6d94560dd2e8"><td class="memSeparator" colspan="2">&#160;</td></tr>
 <tr class="memitem:afe45fc12ad82dc877ead40ae578eb8b2"><td class="memItemLeft" align="right" valign="top">bool&#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="class_adafruit___e_m_c2101.html#afe45fc12ad82dc877ead40ae578eb8b2">setLUTHysteresis</a> (uint8_t hysteresis)</td></tr>
 <tr class="memdesc:afe45fc12ad82dc877ead40ae578eb8b2"><td class="mdescLeft">&#160;</td><td class="mdescRight">Set the amount of hysteresis in degrees celcius of hysteresis applied to temperature readings used for the LUT.  <a href="#afe45fc12ad82dc877ead40ae578eb8b2">More...</a><br /></td></tr>
 <tr class="separator:afe45fc12ad82dc877ead40ae578eb8b2"><td class="memSeparator" colspan="2">&#160;</td></tr>
@@ -244,7 +247,7 @@ Public Member Functions</h2></td></tr>
       </table>
 </div><div class="memdoc">
 
-<p>Enable or disable the temperaturet to fan speed Look Up Table (LUT) </p>
+<p>Enable or disable the temperature-to-fan speed Look Up Table (LUT) </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
     <tr><td class="paramname">enable_lut</td><td>True to enable the LUT, setting the fan speed depending on the configured temp to speed mapping. False disables the LUT, defaulting to the speed setting from <code>setDutyCycle</code> </td></tr>
@@ -322,7 +325,7 @@ false DAC output disabled </dd></dl>
 </div><div class="memdoc">
 
 <p>Read the external temperature diode. </p>
-<dl class="section return"><dt>Returns</dt><dd>float the current temperature in degrees celcius </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>float the current temperature in degrees C </dd></dl>
 
 </div>
 </div>
@@ -364,7 +367,7 @@ false DAC output disabled </dd></dl>
 </div><div class="memdoc">
 
 <p>Read the current fan speed in RPM. </p>
-<dl class="section return"><dt>Returns</dt><dd>uint16_t The current fan speed </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>uint16_t The current fan speed, 0 if no tachometer input </dd></dl>
 
 </div>
 </div>
@@ -408,11 +411,11 @@ false DAC output disabled </dd></dl>
 <p>Set the fan speed. </p>
 <dl class="params"><dt>Parameters</dt><dd>
   <table class="params">
-    <tr><td class="paramname">pwm_duty_cycle</td><td>The duty cycle percentage as an integer</td></tr>
+    <tr><td class="paramname">pwm_duty_cycle</td><td>The duty cycle percentage as an integer The speed is given as the fan's PWM duty cycle and <b>roughly</b> approximates the percentage of the fan's maximum speed </td></tr>
   </table>
   </dd>
 </dl>
-<p>The speed is given as the fan's PWM duty cycle and <b>roughly</b> approximates the percentage of the fan's maximum speed </p><dl class="section return"><dt>Returns</dt><dd>true: success false: failure </dd></dl>
+<dl class="section return"><dt>Returns</dt><dd>true: success false: failure </dd></dl>
 
 </div>
 </div>
@@ -653,6 +656,44 @@ false DAC output disabled </dd></dl>
   </dd>
 </dl>
 <dl class="section return"><dt>Returns</dt><dd>true:success false: failure </dd></dl>
+
+</div>
+</div>
+<a id="a162edee3286c90e0000c6d94560dd2e8"></a>
+<h2 class="memtitle"><span class="permalink"><a href="#a162edee3286c90e0000c6d94560dd2e8">&#9670;&nbsp;</a></span>configPWMClock()</h2>
+
+<div class="memitem">
+<div class="memproto">
+      <table class="memname">
+        <tr>
+          <td class="memname">bool Adafruit_EMC2101::configPWMClock </td>
+          <td>(</td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>clksel</em>, </td>
+        </tr>
+        <tr>
+          <td class="paramkey"></td>
+          <td></td>
+          <td class="paramtype">bool&#160;</td>
+          <td class="paramname"><em>clkovr</em>&#160;</td>
+        </tr>
+        <tr>
+          <td></td>
+          <td>)</td>
+          <td></td><td></td>
+        </tr>
+      </table>
+</div><div class="memdoc">
+
+<p>Configure the PWM clock by selecting the clock source and overflow bit. </p>
+<dl class="params"><dt>Parameters</dt><dd>
+  <table class="params">
+    <tr><td class="paramname">clksel</td><td>The clock select true: Use a 1.4kHz base PWM clock false: Use the default 360kHz PWM clock</td></tr>
+    <tr><td class="paramname">clkovr</td><td>Clock override When true, override the base clock selected by <code>clksel</code> and use the frequency divisor to set the PWM frequency</td></tr>
+  </table>
+  </dd>
+</dl>
+<dl class="section return"><dt>Returns</dt><dd>true:success false:failure </dd></dl>
 
 </div>
 </div>
