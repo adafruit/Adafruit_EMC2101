@@ -12,8 +12,7 @@
  *
  *	BSD license (see license.txt)
  */
-// "requires_busio": "y",
-//   "requires_sensor": "y",
+
 #ifndef _ADAFRUIT_EMC2101_H
 #define _ADAFRUIT_EMC2101_H
 
@@ -69,7 +68,7 @@
 
 #define MAX_LUT_SPEED 0x3F ///< 6-bit value
 #define MAX_LUT_TEMP 0x7F  ///< 7-bit
-///////////////////////////////////////////////////////////////
+
 /**
  * @brief
  *
@@ -121,7 +120,6 @@ public:
   bool setDataRate(emc2101_rate_t data_rate);
 
   bool setLUT(uint8_t index, uint8_t temp_thresh, uint8_t fan_pwm);
-  // add a "clear" flag to set back to default
 
   uint8_t getPWMFrequency(void);
   bool setPWMFrequency(uint8_t pwm_freq);
@@ -151,10 +149,3 @@ private:
 };
 
 #endif
-
-// TODO:
-/*
-PWM params
-TEST Fan Setting register what happens if setting is set while in LUT mode; does
-LUT overwrite it?
-*/
