@@ -335,7 +335,7 @@ bool Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_REG_FAN_SETTING);
 
   // convert from a percentage to that percentage of the max duty cycle
-  pwm_duty_cycle = (uint8_t)(64 * ((float)pwm_duty_cycle / 100));
+  pwm_duty_cycle = map(pwm_duty_cycle, 0, 100, 0, 63);
 
   bool lut_enabled = LUTEnabled();
   LUTEnabled(false);
