@@ -66,6 +66,7 @@ bool Adafruit_EMC2101::begin(uint8_t i2c_address, TwoWire *wire) {
   i2c_dev = new Adafruit_I2CDevice(i2c_address, wire);
 
   if (!i2c_dev->begin()) {
+    Serial.println("Address not found");
     return false;
   }
 
@@ -83,6 +84,7 @@ bool Adafruit_EMC2101::_init(void) {
   // make sure we're talking to the right chip
   if ((chip_id.read() != EMC2101_CHIP_ID) &&
       (chip_id.read() != EMC2101_ALT_CHIP_ID)) {
+    Serial.println("Wrong chip ID ");
     return false;
   }
 
@@ -92,7 +94,7 @@ bool Adafruit_EMC2101::_init(void) {
   configPWMClock(1, 0);
   DACOutEnabled(false); // output PWM mode by default
   LUTEnabled(false);
-  setDutyCycle(100.0);
+  setDutyCycle(100);
 
   enableForcedTemperature(false);
 

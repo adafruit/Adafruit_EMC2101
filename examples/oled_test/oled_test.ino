@@ -35,7 +35,6 @@ void setup(void) {
   //  emc2101.setDataRate(EMC2101_RATE_1_16_HZ);
   Serial.print("Data rate set to: ");
   switch (emc2101.getDataRate()) {
-
     case EMC2101_RATE_1_16_HZ: Serial.println("1/16_HZ"); break;
     case EMC2101_RATE_1_8_HZ: Serial.println("1/8_HZ"); break;
     case EMC2101_RATE_1_4_HZ: Serial.println("1/4_HZ"); break;
@@ -46,33 +45,48 @@ void setup(void) {
     case EMC2101_RATE_8_HZ: Serial.println("8 HZ"); break;
     case EMC2101_RATE_16_HZ: Serial.println("16 HZ"); break;
     case EMC2101_RATE_32_HZ: Serial.println("32 HZ"); break;
-
   }
 
-    emc2101.setDutyCycle(40.0);
-
+  emc2101.setDutyCycle(40);
 }
+
+
 void loop() {
   display.clearDisplay();
   display.setCursor(0,0);
 
-  Serial.print("External Temperature: ");Serial.print(emc2101.getExternalTemperature());Serial.println(" degrees C");
+  Serial.print("External Temperature: ");
+  Serial.print(emc2101.getExternalTemperature());
+  Serial.println(" degrees C");
 
-  Serial.print("Internal Temperature: ");Serial.print(emc2101.getInternalTemperature());Serial.println(" degrees C");
-  Serial.print("Fan RPM:: ");Serial.print(emc2101.getFanRPM());Serial.println(" RPM");
-  Serial.print("LUT Enabled: "); Serial.println(emc2101.LUTEnabled());
+  Serial.print("Internal Temperature: ");
+  Serial.print(emc2101.getInternalTemperature());
+  Serial.println(" degrees C");
+
+  Serial.print("Fan RPM:: ");
+  Serial.print(emc2101.getFanRPM());
+  Serial.println(" RPM");
+
+  Serial.print("LUT Enabled: ");
+  Serial.println(emc2101.LUTEnabled());
   Serial.println("");
-  delay(100);
 
+  display.print("Ext Temp: ");
+  display.print(emc2101.getExternalTemperature());
+  display.println(" deg C");
 
-  display.print("Ext Temp: ");display.print(emc2101.getExternalTemperature());display.println(" deg C");
-  display.print("Int Temp: ");display.print(emc2101.getInternalTemperature());display.println(" deg C");
-  display.print("Fan RPM: ");display.print(emc2101.getFanRPM());display.println(" RPM");
- display.print("PWM: "); display.print(emc2101.getDutyCycle());display.println("");
-  delay(100);
+  display.print("Int Temp: ");
+  display.print(emc2101.getInternalTemperature());
+  display.println(" deg C");
 
+  display.print("Fan RPM: ");
+  display.print(emc2101.getFanRPM());
+  display.println(" RPM");
+
+  display.print("PWM: ");
+  display.print(emc2101.getDutyCycle());
+  display.println("");
 
   display.display();
   delay(100);
-
 }
