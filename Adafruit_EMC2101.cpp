@@ -136,7 +136,7 @@ bool Adafruit_EMC2101::invertFanSpeed(bool invert_speed) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_FAN_CONFIG);
   Adafruit_BusIO_RegisterBits invert_fan_output_bit =
       Adafruit_BusIO_RegisterBits(&fan_config, 1, 4);
-  invert_fan_output_bit.write(invert_speed);
+  return invert_fan_output_bit.write(invert_speed);
 }
 
 /**
@@ -159,7 +159,7 @@ bool Adafruit_EMC2101::configPWMClock(bool clksel, bool clkovr) {
   clksel_bit.write(clksel);
   Adafruit_BusIO_RegisterBits clkovr_bit =
       Adafruit_BusIO_RegisterBits(&fan_config, 1, 2);
-  clkovr_bit.write(clksel);
+  return clkovr_bit.write(clksel);
 }
 
 /**
@@ -339,8 +339,10 @@ bool Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
 
   bool lut_enabled = LUTEnabled();
   LUTEnabled(false);
-  _fan_setting.write(pwm_duty_cycle);
-  LUTEnabled(lut_enabled);
+  if (! _fan_setting.write(pwm_duty_cycle)) {
+    return false;
+  }
+  return LUTEnabled(lut_enabled);
 }
 
 /**
@@ -389,7 +391,7 @@ uint16_t Adafruit_EMC2101::getFanMinRPM(void) {
   tach_limit_msb.read(buffer);
   tach_limit_lsb.read(buffer + 1);
 
-  int16_t raw_limit = buffer[0] << 8;
+  uint16_t raw_limit = buffer[0] << 8;
   raw_limit |= buffer[1];
   if (raw_limit == 0xFFFF) {
     return 0;
