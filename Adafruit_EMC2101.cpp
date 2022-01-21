@@ -337,7 +337,7 @@ bool Adafruit_EMC2101::setDutyCycle(uint8_t pwm_duty_cycle) {
 
   bool lut_enabled = LUTEnabled();
   LUTEnabled(false);
-  if (! _fan_setting.write(pwm_duty_cycle)) {
+  if (!_fan_setting.write(pwm_duty_cycle)) {
     return false;
   }
   return LUTEnabled(lut_enabled);
