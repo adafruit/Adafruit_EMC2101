@@ -188,9 +188,7 @@ bool Adafruit_EMC2101::configFanSpinup(uint8_t spinup_drive,
 
   Adafruit_BusIO_RegisterBits _spin_time_bits =
       Adafruit_BusIO_RegisterBits(&spin_config, 3, 0);
-  if (!_spin_time_bits.write(spinup_time)) {
-    return false;
-  }
+  return _spin_time_bits.write(spinup_time);
 }
 
 /**
