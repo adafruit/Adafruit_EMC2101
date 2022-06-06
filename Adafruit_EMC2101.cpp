@@ -159,7 +159,7 @@ bool Adafruit_EMC2101::configPWMClock(bool clksel, bool clkovr) {
   clksel_bit.write(clksel);
   Adafruit_BusIO_RegisterBits clkovr_bit =
       Adafruit_BusIO_RegisterBits(&fan_config, 1, 2);
-  return clkovr_bit.write(clksel);
+  return clkovr_bit.write(clkovr);
 }
 
 /**
@@ -412,12 +412,12 @@ bool Adafruit_EMC2101::setFanMinRPM(uint16_t min_rpm) {
       Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_LSB);
   Adafruit_BusIO_Register tach_limit_msb =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_TACH_LIMIT_MSB);
-  // speed is given in RPM, convert to LSB:
-  uint16_t lsb_value = EMC2101_FAN_RPM_NUMERATOR / min_rpm;
-  if (!tach_limit_lsb.write(lsb_value & 0xFF)) {
+  // speed is given in RPM, convert to raw value (MSB+LSB):
+  uint16_t raw_value = EMC2101_FAN_RPM_NUMERATOR / min_rpm;
+  if (!tach_limit_lsb.write(raw_value & 0xFF)) {
     return false;
   }
-  if (!tach_limit_msb.write((lsb_value >> 8) & 0xFF)) {
+  if (!tach_limit_msb.write((raw_value >> 8) & 0xFF)) {
     return false;
   }
   return true;
@@ -446,7 +446,7 @@ float Adafruit_EMC2101::getExternalTemperature(void) {
   raw_ext |= buffer[1];
 
   raw_ext >>= 5;
-  return raw_ext * 0.125;
+  return raw_ext * _TEMP_LSB;
 }
 
 /**
@@ -456,10 +456,10 @@ float Adafruit_EMC2101::getExternalTemperature(void) {
  */
 int8_t Adafruit_EMC2101::getInternalTemperature(void) {
   // _INTERNAL_TEMP = const(0x00)
-  Adafruit_BusIO_Register ext_temp_lsb =
+  Adafruit_BusIO_Register int_temp_lsb =
       Adafruit_BusIO_Register(i2c_dev, EMC2101_INTERNAL_TEMP);
 
-  return (int8_t)ext_temp_lsb.read();
+  return (int8_t)int_temp_lsb.read();
 }
 
 /**
@@ -486,7 +486,7 @@ uint16_t Adafruit_EMC2101::getFanRPM(void) {
     return 0;
   }
 
-  return 5400000 / raw_ext;
+  return EMC2101_FAN_RPM_NUMERATOR / raw_ext;
 }
 
 /**
