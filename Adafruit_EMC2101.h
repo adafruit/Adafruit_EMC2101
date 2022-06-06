@@ -66,7 +66,6 @@
   5400000               ///< Conversion unit to convert LSBs to fan RPM
 #define _TEMP_LSB 0.125 ///< single bit value for internal temperature readings
 
-
 /**
  * @brief
  *
