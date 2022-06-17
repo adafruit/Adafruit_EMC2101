@@ -35,7 +35,4 @@ var menudata={children:[
 {text:"m",url:"globals.html#index_m"}]},
 {text:"Enumerations",url:"globals_enum.html"},
 {text:"Enumerator",url:"globals_eval.html"},
-{text:"Macros",url:"globals_defs.html",children:[
-{text:"_",url:"globals_defs.html#index__"},
-{text:"e",url:"globals_defs.html#index_e"},
-{text:"m",url:"globals_defs.html#index_m"}]}]}]}]}
+{text:"Macros",url:"globals_defs.html"}]}]}]}
