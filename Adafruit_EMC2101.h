@@ -66,9 +66,6 @@
   5400000               ///< Conversion unit to convert LSBs to fan RPM
 #define _TEMP_LSB 0.125 ///< single bit value for internal temperature readings
 
-#define MAX_LUT_SPEED 0x3F ///< 6-bit value
-#define MAX_LUT_TEMP 0x7F  ///< 7-bit
-
 /**
  * @brief
  *
