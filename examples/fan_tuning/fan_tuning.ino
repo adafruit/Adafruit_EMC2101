@@ -15,16 +15,14 @@ void setup(void) {
     while (1) { delay(10); }
   }
 
-
   Serial.println("EMC2101 Found!");
-    emc2101.setDutyCycle(40);
-    emc2101.setFanMinRPM(150);
-    Serial.print("FAN minimum RPM:"); Serial.println(emc2101.getFanMinRPM());
+  emc2101.setDutyCycle(40);
+  emc2101.setFanMinRPM(150);
+  Serial.print("FAN minimum RPM:"); Serial.println(emc2101.getFanMinRPM());
 }
 
 void loop() {
-
-
+  
   Serial.print("External Temperature: ");
   Serial.print(emc2101.getExternalTemperature());Serial.println(" degrees C");
 
